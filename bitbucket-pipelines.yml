@@ -1,0 +1,18 @@
+image: python:3.9  # Use Python 3.9 image (Change as needed)
+
+pipelines:
+  default:
+    - step:
+        name: Install Dependencies
+        caches:
+          - pip
+        script:
+          - pip install --upgrade pip
+          - pip install -r requirement.txt  # Install dependencies
+
+    - step:
+        name: Run data_clean.py
+        script:
+          - python app/resources/data_clean.py  # Run your script
+
+    
