@@ -150,7 +150,7 @@ def store_to_db(df):
 
     try:
         # Connect to MySQL server without specifying a database
-        temp_engine = create_engine(f"mysql+pymysql://{user}:{password}@{host}")
+        temp_engine = create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}")
 
         # Create database if not exists
         with temp_engine.connect() as conn:
@@ -158,14 +158,14 @@ def store_to_db(df):
             logging.info(f"Database '{database}' created or already exists.")
 
         # Now, connect to the new database
-        engine = create_engine(f"mysql+pymysql://{user}:{password}@{host}/{database}")
-        return engine
+        engine = create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}/{DB_CONFIG['database']}")
+        # return engine
 
-    try:
-        df.to_sql(table_name, con=engine, if_exists='replace', index=False)
-        logging.info(f"Data successfully stored in '{table_name}' table.")
-    except Exception as e:
-        logging.error(f"Error storing data: {e}")
+        try:
+            df.to_sql(table_name, con=engine, if_exists='replace', index=False)
+            logging.info(f"Data successfully stored in '{table_name}' table.")
+        except Exception as e:
+            logging.error(f"Error storing data: {e}")
 
 def main():
     # Step 1: Fetch and filter data
