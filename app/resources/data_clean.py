@@ -5,6 +5,7 @@ import concurrent.futures
 from sqlalchemy import create_engine
 import os
 import yaml
+import numpy as np
 
 # Set up logging
 logging.basicConfig(filename='eta.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -160,14 +161,15 @@ def store_to_db(df):
         # Now, connect to the new database
         engine = create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}/{DB_CONFIG['database']}")
         # return engine
+        df.to_sql(table_name, con=engine, if_exists='replace', index=False)
+        logging.info(f"Data successfully stored in '{table_name}' table."
+                     )
+    except Exception as e:
+        logging.error(f"Error storing data: {e}")
 
-        try:
-            df.to_sql(table_name, con=engine, if_exists='replace', index=False)
-            logging.info(f"Data successfully stored in '{table_name}' table.")
-        except Exception as e:
-            logging.error(f"Error storing data: {e}")
 
 def main():
+    
     # Step 1: Fetch and filter data
     filtered_data = fetch_and_filter_data()
     if filtered_data is None or filtered_data.empty:
