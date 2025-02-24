@@ -1,20 +1,16 @@
 import pandas as pd
 import requests
-import logging
 import concurrent.futures
 from sqlalchemy import create_engine
 import os
 import yaml
 import numpy as np
 
-# Set up logging
-logging.basicConfig(filename='eta.log', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
-
- # Set up directory paths
+# Set up directory paths
 dir_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 # Load config
-path = os.path.join(dir_path,"config", 'config.yaml')
+path = os.path.join(dir_path, "config", 'config.yaml')
 with open(path, 'r') as config_file:
     DB_CONFIG = yaml.safe_load(config_file)
 
@@ -25,7 +21,6 @@ def get_db_engine():
 def fetch_and_filter_data():
     """
     Fetches data from MySQL and filters based on conditions.
-    
     Returns:
         DataFrame: Filtered data
     """
@@ -34,7 +29,7 @@ def fetch_and_filter_data():
     try:
         engine = get_db_engine()
         df = pd.read_sql(query, engine)
-        logging.info("Data loaded successfully from MySQL.")
+        print("Data loaded successfully from MySQL.")
 
         # Apply filtering conditions
         df_filter = df[(df['leg_hit_status'].isin(['GEOFENCEHIT', 'PINCODEHIT']))]
@@ -53,19 +48,12 @@ def fetch_and_filter_data():
         return df_latest
 
     except Exception as e:
-        logging.error(f"Error fetching data: {e}")
+        print(f"Error fetching data: {e}")
         return None
 
 def fetch_route(start, end):
     """
     Fetches a route from the OSRM API between two points.
-
-    Args:
-        start (dict): {'lat': value, 'lng': value}
-        end (dict): {'lat': value, 'lng': value}
-
-    Returns:
-        float: Distance in meters if successful, None otherwise.
     """
     try:
         url = f"https://router.project-osrm.org/route/v1/driving-hgv/{start['lng']},{start['lat']};{end['lng']},{end['lat']}?overview=full&geometries=geojson"
@@ -76,45 +64,32 @@ def fetch_route(start, end):
         if data.get('routes') and len(data['routes']) > 0:
             return data['routes'][0]['distance']
         else:
-            logging.warning(f"No route found between {start} and {end}.")
+            print(f"No route found between {start} and {end}.")
             return None
 
     except requests.exceptions.RequestException as e:
-        logging.error(f"Route Fetch Error: {e}")
+        print(f"Route Fetch Error: {e}")
         return None
 
 def process_row(index, row):
     """
     Processes a single row to calculate distance.
-
-    Args:
-        index (int): Row index.
-        row (pd.Series): Row data.
-
-    Returns:
-        tuple: (index, calculated_distance)
     """
     start_point = {'lat': row['source_lat'], 'lng': row['source_lon']}
     end_point = {'lat': row['cust_lat'], 'lng': row['cust_long']}
 
-    logging.info(f"Fetching route for row {index}: {start_point} -> {end_point}")
+    print(f"Fetching route for row {index}: {start_point} -> {end_point}")
     
     try:
         distance = fetch_route(start_point, end_point)
         return (index, distance)
     except Exception as e:
-        logging.error(f"Error processing row {index}: {e}")
+        print(f"Error processing row {index}: {e}")
         return (index, None)
 
 def calculate_distances(df):
     """
     Uses multithreading to calculate distances for all rows.
-
-    Args:
-        df (pd.DataFrame): Grouped DataFrame.
-
-    Returns:
-        pd.DataFrame: DataFrame with calculated distances.
     """
     df['hgv_calculated_distance'] = None
 
@@ -124,83 +99,54 @@ def calculate_distances(df):
             index, distance = future.result()
             if distance is not None:
                 df.at[index, 'hgv_calculated_distance'] = distance
-                logging.info(f"Row {index}: Distance calculated: {distance} meters.")
+                print(f"Row {index}: Distance calculated: {distance} meters.")
     
     return df
 
 def merge_with_original(filtered_data, result_df):
-    """
-    Merges calculated distance results with the original filtered data.
-
-    Args:
-        filtered_data (pd.DataFrame): Original filtered data.
-        result_df (pd.DataFrame): DataFrame with calculated distances.
-
-    Returns:
-        pd.DataFrame: Merged DataFrame.
-    """
+    """Merges calculated distance results with the original filtered data."""
     final_df = filtered_data.merge(result_df, on=['source_lat', 'source_lon', 'cust_lat', 'cust_long'], how='left')
     return final_df
 
 def store_to_db(df):
-    """
-    Stores the merged DataFrame into MySQL.
-    """
+    """Stores the merged DataFrame into MySQL."""
     table_name = 'model_data'
     database = 'model_data_db'
 
     try:
-        # Connect to MySQL server without specifying a database
         temp_engine = create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}")
-
-        # Create database if not exists
         with temp_engine.connect() as conn:
             conn.execute(f"CREATE DATABASE IF NOT EXISTS {database};")
-            logging.info(f"Database '{database}' created or already exists.")
+            print(f"Database '{database}' created or already exists.")
 
-        # Now, connect to the new database
         engine = create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}/{DB_CONFIG['database']}")
-        # return engine
         df.to_sql(table_name, con=engine, if_exists='replace', index=False)
-        logging.info(f"Data successfully stored in '{table_name}' table."
-                     )
+        print(f"Data successfully stored in '{table_name}' table.")
     except Exception as e:
-        logging.error(f"Error storing data: {e}")
-
+        print(f"Error storing data: {e}")
 
 def main():
-    
-    # Step 1: Fetch and filter data
     filtered_data = fetch_and_filter_data()
     if filtered_data is None or filtered_data.empty:
-        logging.warning("No valid data found.")
+        print("No valid data found.")
         return
 
-    # Step 2: Group by unique locations
     grouped_data = filtered_data[['source_lat', 'source_lon', 'cust_lat', 'cust_long']].drop_duplicates()
-
-    # Step 3: Calculate distances
+    print("1111111111111111111111111111111111111")
     result_df = calculate_distances(grouped_data)
-
-    # Step 4: Merge results with original data
+    print("22222222222222222222222222222222222222222")
     final_df = merge_with_original(filtered_data, result_df)
-
-    # Step 5: Filter out zero distances
+    print("3333333333333333333333333333333333333333")
     data = final_df[final_df['hgv_calculated_distance'] != 0]
 
-    # Step 6: Compute distance difference flag
     data['dist_diff'] = np.where(
         abs(data['distance'] - data['hgv_calculated_distance']) / data['hgv_calculated_distance'] <= 0.3,
         "TRUE",
         "FALSE"
     )
 
-    # Step 7: Filter for distances with more than 30% difference
     latest_df = data[(data['dist_diff'] == "TRUE") & (data['avg_speed'] >= 0.3)]
-
-    # Step 5: Store in MySQL
     store_to_db(latest_df)
 
-# Run the process
 if __name__ == "__main__":
     main()
