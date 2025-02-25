@@ -9,10 +9,17 @@ import numpy as np
 # Set up directory paths
 dir_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
-# Load config
-path = os.path.join(dir_path, "config", 'config.yaml')
-with open(path, 'r') as config_file:
-    DB_CONFIG = yaml.safe_load(config_file)
+# # Load config
+# path = os.path.join(dir_path, "config", 'config.yaml')
+# with open(path, 'r') as config_file:
+#     DB_CONFIG = yaml.safe_load(config_file)
+
+DB_CONFIG = {
+    "user": os.getenv("DB_USER", "default_user"),
+    "password": os.getenv("DB_PASSWORD", "default_pass"),
+    "host": os.getenv("DB_HOST", "127.0.0.1"),
+    "database": os.getenv("DB_DATABASE", "eta"),
+}
 
 def get_db_engine():
     """Returns a SQLAlchemy engine for MySQL."""

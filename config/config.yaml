@@ -1,4 +1,4 @@
-host: "127.0.0.1"
-user: "root"
-password: "password"
-database: "eta"
+user: ${DB_USER}
+password: ${DB_PASSWORD}
+host: ${DB_HOST}
+database: ${DB_DATABASE}
