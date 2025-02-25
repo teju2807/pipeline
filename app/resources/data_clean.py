@@ -36,6 +36,7 @@ def fetch_and_filter_data():
     
     try:
         engine = get_db_engine()
+        print("engine",engine)
         df = pd.read_sql(query, engine)
         print("Data loaded successfully from MySQL.")
 
