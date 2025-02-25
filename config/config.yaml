@@ -1,4 +1,4 @@
-user: ${DB_USER}
-password: ${DB_PASSWORD}
-host: ${DB_HOST}
-database: ${DB_DATABASE}
+host: "10.0.1.168"
+user: "apdev"
+password: "Aut0t@t321"
+database: "ap_widgets"

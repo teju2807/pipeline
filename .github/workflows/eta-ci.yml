@@ -12,21 +12,21 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      mysql:
-        image: mysql:5.7
-        env:
-          MYSQL_ROOT_PASSWORD: root
-          MYSQL_DATABASE: eta
-          MYSQL_USER: user
-          MYSQL_PASSWORD: password
-        ports:
-          - 3306:3306
-        options: >-
-          --health-cmd="mysqladmin ping -h 127.0.0.1 -uuser -ppassword"
-          --health-interval=10s
-          --health-timeout=5s
-          --health-retries=3
+    # services:
+    #   mysql:
+    #     image: mysql:5.7
+    #     env:
+    #       MYSQL_ROOT_PASSWORD: root
+    #       MYSQL_DATABASE: eta
+    #       MYSQL_USER: user
+    #       MYSQL_PASSWORD: password
+    #     ports:
+    #       - 3306:3306
+    #     options: >-
+    #       --health-cmd="mysqladmin ping -h 127.0.0.1 -uuser -ppassword"
+    #       --health-interval=10s
+    #       --health-timeout=5s
+    #       --health-retries=3
 
     steps:
       - name: Checkout code
@@ -42,18 +42,18 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirement.txt
 
-      - name: Wait for MySQL to be ready
-        run: sleep 15  # Give MySQL time to start
+      # - name: Wait for MySQL to be ready
+      #   run: sleep 15  # Give MySQL time to start
 
-      - name: Verify MySQL Connection
-        run: |
-          sudo apt-get install mysql-client
-          mysql -h 127.0.0.1 -uuser -ppassword -e "SHOW DATABASES;"
+      # - name: Verify MySQL Connection
+      #   run: |
+      #     sudo apt-get install mysql-client
+      #     mysql -h 127.0.0.1 -uuser -ppassword -e "SHOW DATABASES;"
 
       - name: Data cleaning
-        env:
-          DB_HOST: 127.0.0.1
-          DB_USER: user
-          DB_PASSWORD: password
-          DB_DATABASE: eta
+        # env:
+        #   DB_HOST: 127.0.0.1
+        #   DB_USER: user
+        #   DB_PASSWORD: password
+        #   DB_DATABASE: eta
         run: python app/resources/data_clean.py
