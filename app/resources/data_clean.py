@@ -35,7 +35,7 @@ def fetch_and_filter_data():
     Returns:
         DataFrame: Filtered data
     """
-    query = "SELECT * FROM ap_widgets.tb_triplegwise;"
+    query = "SELECT * FROM eta.eta_data;"
     
     try:
         # engine = get_db_engine()
