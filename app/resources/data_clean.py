@@ -146,7 +146,8 @@ def main():
     )
 
     latest_df = data[(data['dist_diff'] == "TRUE") & (data['avg_speed'] >= 0.3)]
-    store_to_db(latest_df)
+    print("latest_df",latest_df)
+    # store_to_db(latest_df)
 
 if __name__ == "__main__":
     main()

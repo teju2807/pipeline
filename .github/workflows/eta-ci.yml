@@ -26,5 +26,17 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirement.txt
 
+      - name: Importing MYSQL file
+        env:
+          DB_HOST: 127.0.0.1
+          DB_CONNECTION: mysql
+          DB_DATABASE: test
+          DB_PORT: ${{ job.services.mysql.ports[3306] }}
+          DB_USER: root
+          DB_PASSWORD: password
+        run: |
+            sudo /etc/init.d/mysql start
+            mysql -Dtest -uroot -ppassword -hlocalhost -P33306 < "api_token.sql"
+
       - name: Data cleaning
         run: python app/resources/data_clean.py
