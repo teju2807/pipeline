@@ -145,7 +145,7 @@ def main():
         print("No valid data found.")
         return
 
-    grouped_data = filtered_data[['source_lat', 'source_lon', 'cust_lat', 'cust_long']].drop_duplicates()
+    grouped_data = filtered_data[['source_lat', 'source_long', 'cust_lat', 'cust_long']].drop_duplicates()
     print("11111111111111111111111111111111111111")
     result_df = calculate_distances(grouped_data)
     print("22222222222222222222222222222222222222222")
