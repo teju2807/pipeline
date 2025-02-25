@@ -5,6 +5,7 @@ from sqlalchemy import create_engine
 import os
 import yaml
 import numpy as np
+from urllib.parse import quote
 
 # Set up directory paths
 dir_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -23,7 +24,7 @@ with open(path, 'r') as config_file:
 
 def get_db_engine():
     """Returns a SQLAlchemy engine for MySQL."""
-    return create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{DB_CONFIG['password']}@{DB_CONFIG['host']}/{DB_CONFIG['database']}")
+    return create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{quote(DB_CONFIG['password'])}@{DB_CONFIG['host']}/{DB_CONFIG['database']}")
 
 def fetch_and_filter_data():
     """
