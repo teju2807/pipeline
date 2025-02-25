@@ -32,7 +32,7 @@ def fetch_and_filter_data():
     Returns:
         DataFrame: Filtered data
     """
-    query = "SELECT * FROM ap_widgets.tb_triplegwis;"
+    query = "SELECT * FROM ap_widgets.tb_triplegwise;"
     
     try:
         engine = get_db_engine()
