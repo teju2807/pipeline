@@ -22,9 +22,11 @@ with open(path, 'r') as config_file:
 #     "database": os.getenv("DB_DATABASE", "eta"),
 # }
 
+encoded_password = quote(DB_CONFIG['password'])
+
 def get_db_engine():
     """Returns a SQLAlchemy engine for MySQL."""
-    return create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{quote(DB_CONFIG['password'])}@{DB_CONFIG['host']}/{DB_CONFIG['database']}")
+    return create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{encoded_password}@{DB_CONFIG['host']}/{DB_CONFIG['database']}")
 
 def fetch_and_filter_data():
     """
