@@ -56,4 +56,4 @@ jobs:
         #   DB_USER: user
         #   DB_PASSWORD: password
         #   DB_DATABASE: eta
-        run: python app/resources/data_clean.py
+        run: python test.py
