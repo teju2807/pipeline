@@ -6,6 +6,7 @@ import os
 import yaml
 import numpy as np
 from urllib.parse import quote
+import pymysql
 
 # Set up directory paths
 dir_path = os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
@@ -24,9 +25,9 @@ with open(path, 'r') as config_file:
 
 encoded_password = quote(DB_CONFIG['password'])
 
-def get_db_engine():
-    """Returns a SQLAlchemy engine for MySQL."""
-    return create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{encoded_password}@{DB_CONFIG['host']}/{DB_CONFIG['database']}")
+# def get_db_engine():
+#     """Returns a SQLAlchemy engine for MySQL."""
+#     return create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{encoded_password}@{DB_CONFIG['host']}/{DB_CONFIG['database']}")
 
 def fetch_and_filter_data():
     """
@@ -37,9 +38,11 @@ def fetch_and_filter_data():
     query = "SELECT * FROM ap_widgets.tb_triplegwise;"
     
     try:
-        engine = get_db_engine()
-        print("engine",engine)
-        df = pd.read_sql(query, engine)
+        # engine = get_db_engine()
+        conn = pymysql.connect(host=DB_CONFIG['host'], user=DB_CONFIG['user'], password=encoded_password, database=DB_CONFIG['database'])
+        print("Connected successfully")
+        print("engine",conn)
+        df = pd.read_sql(query, conn)
         print("Data loaded successfully from MySQL.")
 
         # Apply filtering conditions
