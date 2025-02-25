@@ -89,7 +89,7 @@ def process_row(index, row):
     """
     Processes a single row to calculate distance.
     """
-    start_point = {'lat': row['source_lat'], 'lng': row['source_lon']}
+    start_point = {'lat': row['source_lat'], 'lng': row['source_long']}
     end_point = {'lat': row['cust_lat'], 'lng': row['cust_long']}
 
     print(f"Fetching route for row {index}: {start_point} -> {end_point}")
