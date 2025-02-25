@@ -119,7 +119,7 @@ def calculate_distances(df):
 
 def merge_with_original(filtered_data, result_df):
     """Merges calculated distance results with the original filtered data."""
-    final_df = filtered_data.merge(result_df, on=['source_lat', 'source_lon', 'cust_lat', 'cust_long'], how='left')
+    final_df = filtered_data.merge(result_df, on=['source_lat', 'source_long', 'cust_lat', 'cust_long'], how='left')
     return final_df
 
 def store_to_db(df):
