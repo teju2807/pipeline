@@ -1,4 +1,4 @@
-host: "10.0.1.168"
-user: "apdev"
-password: "Aut0t@t321"
-database: "ap_widgets"
+host: "serveo.net"
+user: "user"
+password: "password"
+database: "eta"

@@ -23,7 +23,7 @@ with open(path, 'r') as config_file:
 #     "database": os.getenv("DB_DATABASE", "eta"),
 # }
 
-encoded_password = quote(DB_CONFIG['password'])
+# encoded_password = quote(DB_CONFIG['password'])
 
 # def get_db_engine():
 #     """Returns a SQLAlchemy engine for MySQL."""
@@ -39,7 +39,7 @@ def fetch_and_filter_data():
     
     try:
         # engine = get_db_engine()
-        conn = pymysql.connect(host=DB_CONFIG['host'], user=DB_CONFIG['user'], password=encoded_password, database=DB_CONFIG['database'])
+        conn = pymysql.connect(host=DB_CONFIG['host'], user=DB_CONFIG['user'], password=DB_CONFIG['password'], database=DB_CONFIG['database'])
         print("Connected successfully")
         print("engine",conn)
         df = pd.read_sql(query, conn)
@@ -161,7 +161,7 @@ def main():
 
     latest_df = data[(data['dist_diff'] == "TRUE") & (data['avg_speed'] >= 0.3)]
     print("latest_df",latest_df)
-    # store_to_db(latest_df)
+    store_to_db(latest_df)
 
 if __name__ == "__main__":
     main()
