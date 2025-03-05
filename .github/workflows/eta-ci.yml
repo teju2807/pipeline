@@ -40,7 +40,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v2
         with:
-          python-version: '3.9'
+          python-version: '3.10'
 
       - name: Install dependencies
         run: |
@@ -56,9 +56,4 @@ jobs:
       #     mysql -h 127.0.0.1 -uuser -ppassword -e "SHOW DATABASES;"
 
       - name: Data cleaning
-        # env:
-        #   DB_HOST: 127.0.0.1
-        #   DB_USER: user
-        #   DB_PASSWORD: password
-        #   DB_DATABASE: eta
         run: python app/resources/data_clean.py

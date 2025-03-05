@@ -44,7 +44,9 @@ def get_last_processed_id():
 
 def update_last_processed_id(new_max_id):
     """Update the last processed ID after completion."""
-    query = f"INSERT INTO processed_data (id) VALUES ({new_max_id}) ON DUPLICATE KEY UPDATE id = {new_max_id};"
+    query = "INSERT INTO processed_data (id) VALUES (%s) ON DUPLICATE KEY UPDATE id = %s;"
+    cursor.execute(query, (new_max_id, new_max_id))
+
     try:
         conn = pymysql.connect(host=DB_CONFIG['host'], user=DB_CONFIG['user'], password=DB_CONFIG['password'], database=DB_CONFIG['database'])
         with conn.cursor() as cursor:
@@ -52,6 +54,9 @@ def update_last_processed_id(new_max_id):
             conn.commit()
     except Exception as e:
         print(f"Error updating last processed ID: {e}")
+        
+    finally:
+        conn.close()  # Always close connection
 
 def fetch_and_filter_data():
     """
@@ -131,7 +136,7 @@ def calculate_distances(df):
     """
     Uses multithreading to calculate distances for all rows.
     """
-    df['hgv_calculated_distance'] = None
+    df.loc[:, 'hgv_calculated_distance'] = None
 
     with concurrent.futures.ThreadPoolExecutor() as executor:
         futures = {executor.submit(process_row, index, row): index for index, row in df.iterrows()}
