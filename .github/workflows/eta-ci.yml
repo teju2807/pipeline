@@ -47,13 +47,5 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirement.txt
 
-      # - name: Wait for MySQL to be ready
-      #   run: sleep 15  # Give MySQL time to start
-
-      # - name: Verify MySQL Connection
-      #   run: |
-      #     sudo apt-get install mysql-client
-      #     mysql -h 127.0.0.1 -uuser -ppassword -e "SHOW DATABASES;"
-
       - name: Data cleaning
         run: python app/resources/data_clean.py
