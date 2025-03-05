@@ -35,7 +35,7 @@ jobs:
 
       - name: Test Database Connection
         run: |
-          mysql -h 127.0.0.1 -u user -p'password' -e "SHOW DATABASES;"
+          mysql -h 127.0.0.1 -u root -p'password' -e "SHOW DATABASES;"
 
       - name: Set up Python
         uses: actions/setup-python@v2
