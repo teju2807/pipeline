@@ -29,27 +29,53 @@ with open(path, 'r') as config_file:
 #     """Returns a SQLAlchemy engine for MySQL."""
 #     return create_engine(f"mysql+pymysql://{DB_CONFIG['user']}:{encoded_password}@{DB_CONFIG['host']}/{DB_CONFIG['database']}")
 
+def get_last_processed_id():
+    """Retrieve last processed ID from MySQL or a local file."""
+    query = "SELECT MAX(id) FROM processed_data;"  # Create a table to track processed ID
+    try:
+        conn = pymysql.connect(host=DB_CONFIG['host'], user=DB_CONFIG['user'], password=DB_CONFIG['password'], database=DB_CONFIG['database'])
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            result = cursor.fetchone()
+            return result[0] if result and result[0] else 0  # Return last max ID or 0 if not found
+    except Exception as e:
+        print(f"Error fetching last processed ID: {e}")
+        return 0
+
+def update_last_processed_id(new_max_id):
+    """Update the last processed ID after completion."""
+    query = f"INSERT INTO processed_data (id) VALUES ({new_max_id}) ON DUPLICATE KEY UPDATE id = {new_max_id};"
+    try:
+        conn = pymysql.connect(host=DB_CONFIG['host'], user=DB_CONFIG['user'], password=DB_CONFIG['password'], database=DB_CONFIG['database'])
+        with conn.cursor() as cursor:
+            cursor.execute(query)
+            conn.commit()
+    except Exception as e:
+        print(f"Error updating last processed ID: {e}")
+
 def fetch_and_filter_data():
     """
     Fetches data from MySQL and filters based on conditions.
-    Returns:
-        DataFrame: Filtered data
     """
-    query = "SELECT * FROM eta.eta_data;"
+    last_max_id = get_last_processed_id()
+    query = f"SELECT * FROM eta.eta_data WHERE id > {last_max_id};"
     
     try:
-        # engine = get_db_engine()
         conn = pymysql.connect(host=DB_CONFIG['host'], user=DB_CONFIG['user'], password=DB_CONFIG['password'], database=DB_CONFIG['database'])
         print("Connected successfully")
-        print("engine",conn)
         df = pd.read_sql(query, conn)
-        print("Data loaded successfully from MySQL.")
+        
+        if df.empty:
+            print("No new data to process.")
+            return None
+        
+        print(f"Processing {len(df)} new records from ID {last_max_id + 1} to {df['id'].max()}.")
 
         # Apply filtering conditions
         df_filter = df[(df['leg_hit_status'].isin(['GEOFENCEHIT', 'PINCODEHIT']))]
 
         df_updated = df_filter[
-            (df_filter['source_lat'] != 0) & (df_filter['source_long'] != 0) &
+            (df_filter['source_lat'] != 0) & (df_filter['source_long'] != 0) & 
             (df_filter['cust_lat'] != 0) & (df_filter['cust_long'] != 0) &
             (df_filter['distance'] > 0) & (df_filter['duration'] > 0) & (df_filter['avg_speed'] > 0)
         ]
@@ -59,11 +85,11 @@ def fetch_and_filter_data():
         # Convert duration from ms to seconds
         df_latest['duration_sec'] = df_latest['duration'] / 1000
 
-        return df_latest
+        return df_latest, df['id'].max()  # Return both filtered data and max ID
 
     except Exception as e:
         print(f"Error fetching data: {e}")
-        return None
+        return None, last_max_id
 
 def fetch_route(start, end):
     """
@@ -138,19 +164,19 @@ def store_to_db(df):
         print(f"Data successfully stored in '{table_name}' table.")
     except Exception as e:
         print(f"Error storing data: {e}")
-
+        
+        
 def main():
-    filtered_data = fetch_and_filter_data()
+    filtered_data, new_max_id = fetch_and_filter_data()
     if filtered_data is None or filtered_data.empty:
         print("No valid data found.")
         return
 
     grouped_data = filtered_data[['source_lat', 'source_long', 'cust_lat', 'cust_long']].drop_duplicates()
-    print("11111111111111111111111111111111111111")
+    print("Processing route distances...")
     result_df = calculate_distances(grouped_data)
-    print("22222222222222222222222222222222222222222")
+
     final_df = merge_with_original(filtered_data, result_df)
-    print("3333333333333333333333333333333333333333")
     data = final_df[final_df['hgv_calculated_distance'] != 0]
 
     data['dist_diff'] = np.where(
@@ -160,8 +186,12 @@ def main():
     )
 
     latest_df = data[(data['dist_diff'] == "TRUE") & (data['avg_speed'] >= 0.3)]
-    print("latest_df",latest_df)
+    print(f"Storing {len(latest_df)} processed rows into DB.")
     store_to_db(latest_df)
+
+    # Update last processed ID
+    update_last_processed_id(new_max_id)
 
 if __name__ == "__main__":
     main()
+

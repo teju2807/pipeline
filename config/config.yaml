@@ -1,4 +1,4 @@
-host: "serveo.net"
-user: "user"
+host: "127.0.0.1"
+user: "root"
 password: "password"
 database: "eta"
