@@ -1,51 +1,37 @@
-name: MLOps CI Pipeline
+name: ML Pipeline (Self-Hosted Runner)
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
-      
-jobs:
-  build:
-    runs-on: self-hosted
-    # ubuntu-latest
+  workflow_dispatch:  # Manual trigger from GitHub UI
 
-    # services:
-    #   mysql:
-    #     image: mysql:5.7
-    #     env:
-    #       MYSQL_ROOT_PASSWORD: root
-    #       MYSQL_DATABASE: eta
-    #       MYSQL_USER: user
-    #       MYSQL_PASSWORD: password
-    #     ports:
-    #       - 3306:3306
-    #     options: >-
-    #       --health-cmd="mysqladmin ping -h 127.0.0.1 -uuser -ppassword"
-    #       --health-interval=10s
-    #       --health-timeout=5s
-    #       --health-retries=3
+jobs:
+  train:
+    runs-on: self-hosted
+    name: Train Model on Custom Machine
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-
-      - name: Test Database Connection
-        run: |
-          mysql -h 127.0.0.1 -u root -p'password' -e "SHOW DATABASES;"
+      - name: Checkout Repository
+        uses: actions/checkout@v4
 
       - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10'
-
-      - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirement.txt
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r reqq.txt
 
-      - name: Data cleaning
-        run: python app/resources/data_clean.py
+      - name: Run Data Cleaning and Model Training
+        run: |
+          source venv/bin/activate
+          python app/resources/data_clean.py
+          python app/resources/train.py
+
+      - name: Save Models
+        run: |
+          mkdir -p saved_models
+          cp -r models/* saved_models/ || echo "No models found"
+
+      - name: Upload Models (optional)
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-models
+          path: saved_models/

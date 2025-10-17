@@ -2,3 +2,5 @@ host: "127.0.0.1"
 user: "root"
 password: "password"
 database: "eta"
+
+connection_url: "https://605cefe3951c.ngrok-free.app/run_query"
