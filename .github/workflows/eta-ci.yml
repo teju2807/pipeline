@@ -17,7 +17,7 @@ jobs:
           python -m venv venv
           ./venv/Scripts/activate
           pip install --upgrade pip
-          pip install -r reqq.txt
+          pip install -r req.txt
 
       - name: Run Data Cleaning and Model Training
         run: |
