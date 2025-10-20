@@ -306,8 +306,8 @@ def create_indexes(database2, table_name2):
 def main():
     database1 = 'eta'
     table_name1 = 'eta_data'
-    database2 = 'model_data_db1'
-    table_name2 = 'model_data1'
+    database2 = 'model_data_db2'
+    table_name2 = 'model_data2'
     table_name3 = 'processed_data1'
     filtered_data, new_max_id = fetch_and_filter_data(database1,table_name1,database2,table_name3)
     if filtered_data is None or filtered_data.empty:
