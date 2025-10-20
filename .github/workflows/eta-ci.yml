@@ -21,7 +21,7 @@ jobs:
 
       - name: Run Data Cleaning and Model Training
         run: |
-          source venv/bin/activate
+          ./venv/Scripts/activate
           python app/resources/data_clean.py
           python app/resources/train.py
 
