@@ -3,4 +3,4 @@ user: "root"
 password: "password"
 database: "eta"
 
-connection_url: "https://f9d549079adb.ngrok-free.app/run_query"
+connection_url: "https://ef04dc5b343c.ngrok-free.app/run_query"
